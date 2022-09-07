@@ -1,0 +1,29 @@
+﻿{
+  "Credentials": {
+    "Username": "",
+    "Password": ""
+  },
+  "HttpClientSettings": {
+    "ClientId": "mtgspot",
+    "BaseUrl": "https://mtgspot.cn-panel.pl",
+    "LoginUrl": "/shop_users/token",
+    "OrdersUrl": "/orders"
+  },
+  "AppSettings": {
+    "OutputFileName": "collection.txt",
+    "ItemNameReplacePattern": "\\(.+\\)|\\*+",
+    "ExcludedItemNames": [
+      "Plains",
+      "Island",
+      "Swamp",
+      "Mountain",
+      "Forest"
+    ],
+    "ExcludedItemCategories": [
+      "Kości"
+    ],
+    "ExcludedItemRarities": [
+      "Token"
+    ]
+  }
+}
