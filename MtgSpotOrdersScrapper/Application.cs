@@ -1,22 +1,50 @@
 ﻿using System.Text.RegularExpressions;
+using MtgSpotOrdersScrapper.Common;
 
 namespace MtgSpotOrdersScrapper;
 
-public class Application
+// ReSharper disable once ClassNeverInstantiated.Global
+public class Application : ConsoleAppBase
 {
-    private readonly HttpClientWrapper _httpClient;
+    private readonly MtgSpotService _mtgSpotHttpClient;
     private readonly ConfigurationManager _configurationManager;
     private ConfigurationAppSettings AppSettings => _configurationManager.AppSettings;
 
     public Application()
     {
         _configurationManager = new ConfigurationManager();
-        _httpClient = new HttpClientWrapper(_configurationManager);
+        _mtgSpotHttpClient = new MtgSpotService(_configurationManager);
     }
 
-    public async Task OutputUserCollection()
+    [Command("full-collection")]
+    // ReSharper disable once UnusedMember.Global
+    public async Task OutputUserCollection(
+        [Option("-u", "username")] string? username = null,
+        [Option("-p", "password")] string? password = null)
     {
-        var collection = await GetUserCollection();
+        var loginResult = await _mtgSpotHttpClient.Login(username, password);
+        if (loginResult.IsFailure)
+        {
+            await Console.Error.WriteLineAsync(loginResult.ErrorMessage);
+            return;
+        }
+
+        await Console.Out.WriteLineAsync("Successfully logged in!");
+
+        var collectionResult = await GetUserCollection();
+        if (collectionResult.IsFailure)
+        {
+            await Console.Error.WriteLineAsync(collectionResult.ErrorMessage);
+            return;
+        }
+
+        var collection = collectionResult.Data!;
+
+        await SaveCollectionToFile(collection);
+    }
+
+    private async Task SaveCollectionToFile(List<ItemDto> collection)
+    {
         Console.WriteLine($"Started saving collection to file: {AppSettings.OutputFileName}");
         await using var streamWriter = new StreamWriter(path: AppSettings.OutputFileName, append: false);
         foreach (var item in collection)
@@ -28,20 +56,33 @@ public class Application
         Console.WriteLine("Finished saving collection!");
     }
 
-    private async Task<List<ItemDto>> GetUserCollection()
+    private async Task<IResult<List<ItemDto>>> GetUserCollection()
     {
-        if (!await _httpClient.Login())
-            return new List<ItemDto>();
-        var orders = await _httpClient.GetOrders();
+        var ordersResult = await _mtgSpotHttpClient.GetOrders();
+        if (ordersResult.IsFailure)
+            return ordersResult.MapError<List<ItemDto>>();
+        var orders = ordersResult.Data!;
+        await Console.Out.WriteLineAsync($"Successfully fetched {orders.Count} orders.");
         var collection = new List<ItemDto>();
-        foreach (var o in orders)
+
+        foreach (var o in NotExcludedOrders(orders))
         {
-            var items = await _httpClient.GetOrderItems(o);
+            var itemsResult = await _mtgSpotHttpClient.GetOrderItems(o);
+            if (itemsResult.IsFailure)
+                return itemsResult.MapError<List<ItemDto>>();
+            var items = itemsResult.Data!;
+            await Console.Out.WriteLineAsync($"Successfully fetched {items.Count} items for order {o.IdOrder}");
             collection.AddRange(items.Where(ItemIsNotExcluded));
         }
 
         Console.WriteLine("Finished fetching collection!");
-        return collection;
+        return collection.Success();
+    }
+
+    private IEnumerable<OrderDto> NotExcludedOrders(List<OrderDto> orders)
+    {
+        return orders.Where(o =>
+            _configurationManager.AppSettings.ExcludedOrderIds.All(excluded => o.IdOrder != excluded));
     }
 
     private bool ItemIsNotExcluded(ItemDto item)

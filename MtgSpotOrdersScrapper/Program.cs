@@ -2,5 +2,4 @@
 
 using MtgSpotOrdersScrapper;
 
-var app = new Application();
-await app.OutputUserCollection();
+ConsoleApp.Run<Application>(args);

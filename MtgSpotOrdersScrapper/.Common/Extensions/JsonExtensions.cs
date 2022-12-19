@@ -1,7 +1,7 @@
 ﻿using System.Net.Http.Json;
 using System.Text.Json;
 
-namespace MtgSpotOrdersScrapper;
+namespace MtgSpotOrdersScrapper.Common.Extensions;
 
 public static class JsonExtensions
 {

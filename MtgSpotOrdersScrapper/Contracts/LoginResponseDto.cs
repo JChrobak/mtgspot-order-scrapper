@@ -1,4 +1,4 @@
-﻿namespace MtgSpotOrdersScrapper;
+﻿namespace MtgSpotOrdersScrapper.Contracts;
 
 // ReSharper disable once ClassNeverInstantiated.Global
 public class LoginResponseDto

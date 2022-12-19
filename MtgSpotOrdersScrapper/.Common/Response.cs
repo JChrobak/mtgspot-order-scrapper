@@ -1,4 +1,4 @@
-﻿namespace MtgSpotOrdersScrapper;
+﻿namespace MtgSpotOrdersScrapper.Common;
 
 public class DataResponse<T>
 {

@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 
-namespace MtgSpotOrdersScrapper;
+namespace MtgSpotOrdersScrapper.Common.Extensions;
 
 public class SnakeCaseNamingPolicy : JsonNamingPolicy
 {

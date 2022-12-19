@@ -4,7 +4,7 @@ namespace MtgSpotOrdersScrapper;
 
 public class ConfigurationManager
 {
-    private IConfiguration _configuration;
+    private readonly IConfiguration _configuration;
 
     public ConfigurationCredentials Credentials =>
         _configuration.GetSection(nameof(Credentials)).Get<ConfigurationCredentials>();
@@ -49,5 +49,6 @@ public class ConfigurationAppSettings
     public List<string> ExcludedItemCategories { get; set; } = null!;
     public List<string> ExcludedItemRarities { get; set; } = null!;
     public List<string> ExcludedItemNames { get; set; } = null!;
+    public List<int> ExcludedOrderIds { get; set; } = null!;
     public string OutputFileName { get; set; } = null!;
 }

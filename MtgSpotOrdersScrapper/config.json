@@ -24,6 +24,10 @@
     ],
     "ExcludedItemRarities": [
       "Token"
+    ],
+    "ExcludedOrderIds": [
+      54286,
+      54368
     ]
   }
 }
